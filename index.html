@@ -7,8 +7,15 @@
     <title>Document</title>
 </head>
 <body>
-    <div class="pluginMessage"></div>
-    <div class="pluginForm"></div>
+    <div id="openFormReminder" class="openForm">+</div>
+    <div class="formReminderWrapper">
+        <form id="formReminder" class="formReminder" style="width: 500px;">
+            <input type="datetime-local" class="formReminderDate formInput">
+            <input type="url" class="formReminderURL formInput">
+            <textarea cols="30" rows="10" class="formReminderText formInput" placeholder="Наименование задачи"></textarea>
+            <button type="submit" class="formInput">Отправить</button>
+        </form>
+    </div>
     <header class="header"></header>
     <section class="content">
         <div class="contentEl">
