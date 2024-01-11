@@ -8,10 +8,10 @@
 </head>
 <body>
     <div id="openFormReminder" class="openForm">+</div>
-    <div class="formReminderWrapper">
+    <div class="formReminderWrapper" style="display: none;" id="formReminderWrapper">
         <form id="formReminder" class="formReminder" style="width: 500px;">
             <input type="datetime-local" class="formReminderDate formInput">
-            <input type="url" class="formReminderURL formInput">
+            <input id="formReminderURL" type="url" class="formReminderURL formInput" value="">
             <textarea cols="30" rows="10" class="formReminderText formInput" placeholder="Наименование задачи"></textarea>
             <button type="submit" class="formInput">Отправить</button>
         </form>
