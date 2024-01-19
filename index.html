@@ -9,10 +9,14 @@
 <body>
     <div id="openFormReminder" class="openForm">+</div>
     <div class="formReminderWrapper" style="display: none;" id="formReminderWrapper">
-        <form id="formReminder" class="formReminder" style="width: 500px;">
+        <div class="showReminder">
+            <p class="reminderIntro">НАПОМИНАНИЕ</p>
+            <p class="reminderText"></p>
+        </div>
+        <form id="formReminder" class="formReminder">
             <input id="formReminderDate" type="datetime-local" class="formReminderDate formInput">
             <input id="formReminderURL" type="url" class="formReminderURL formInput">
-            <textarea id="formReminderText" cols="30" rows="10" class="formReminderText formInput" placeholder="Наименование задачи"></textarea>
+            <textarea id="formReminderText" cols="30" rows="10" class="formReminderText formInput" placeholder="Введите текст напоминания"></textarea>
             <button type="submit" class="formInput">Отправить</button>
         </form>
     </div>
