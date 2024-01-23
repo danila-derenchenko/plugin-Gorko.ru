@@ -10,8 +10,13 @@ const formReminderWrapper = document.getElementById("formReminderWrapper")
 /* Слушатели событий */
 
 window.addEventListener("beforeunload", () => {
-    localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
-    localStorage.setItem("tasksList", JSON.stringify([]))
+    if((JSON.parse(localStorage.getItem("countPages")) - 1) == 0) {
+        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
+        localStorage.setItem("tasksList", JSON.stringify([]))
+        localStorage.setItem("loadedReminder", JSON.parse(false))
+    } else {
+        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
+    }
 })
 
 /* при событии submit данные о новой задаче добавляются в localhost */
@@ -98,17 +103,23 @@ const initualizationTaskList = (taskList) => {
     }
 }
 
-/* Логика */
+// Логика
 
 /* Запросы к серверу */
 
-/* Получение уже созданных задач, и установка таймеров */
-fetch('https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json').then((res) => res.json()).then(result => {
-    initualizationTaskList(result)
-}).catch(() => console.error("Ошибка получения данных"))
-
-
-// showReminder.style = "display: none"
+// Проверка загрузки напоминаний с сервера на других вкладках
+if(localStorage.getItem("loadedReminder") == null || JSON.parse(localStorage.getItem("loadedReminder")) == false) {
+    localStorage.setItem("loadedReminder", JSON.stringify(true))
+    // Получение уже созданных задач, и установка таймеров
+    fetch('https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json').then((res) => res.json()).then(result => {
+        initualizationTaskList(result)
+    }).catch(() => console.error("Ошибка получения данных"))
+} else {
+    for(let i = 0; i < JSON.parse(localStorage.getItem("tasksList")).length; i++) {
+        addTimerTask(JSON.parse(localStorage.getItem("tasksList"))[i])
+    }
+}
+// Проверка количества открытых вкладок
 if(localStorage.getItem("countPages") == null || JSON.parse(localStorage.getItem("countPages")) <= 0) {
     localStorage.setItem("countPages", JSON.stringify(1))
 } else {
