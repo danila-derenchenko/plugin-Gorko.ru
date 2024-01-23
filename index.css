@@ -77,6 +77,8 @@
 }
 
 .showReminder {
+    text-decoration: none;
+    color: black;
     width: 500px;
     display: flex;
     flex-direction: column;

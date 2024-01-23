@@ -6,12 +6,12 @@ const inputURL = document.getElementById("formReminderURL")
 const inputText = document.getElementById("formReminderText")
 const inputDate = document.querySelector("#formReminderDate")
 const formReminderWrapper = document.getElementById("formReminderWrapper")
-const showReminder = document.getElementById("showReminder")
 
 /* Слушатели событий */
 
 window.addEventListener("beforeunload", () => {
     localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
+    localStorage.setItem("tasksList", JSON.stringify([]))
 })
 
 /* при событии submit данные о новой задаче добавляются в localhost */
@@ -19,6 +19,7 @@ window.addEventListener("beforeunload", () => {
 formReminder.addEventListener("submit", (event) => {
     event.preventDefault()
     formReminderWrapper.style = "display: none"
+    formReminder.style = "display: none"
     const data = {
         dateTime: inputDate.value,
         URLaddres: inputURL.value,
@@ -34,17 +35,39 @@ openForm.addEventListener("click", () => {showForm(document.URL)})
 
 /* Функции */
 
+const showReminder = (reminder) => {
+    formReminderWrapper.insertAdjacentHTML("afterbegin", `
+    <a href="${reminder.URLaddres}" id="reminder${reminder.id}" class="showReminder">
+        <p class="reminderIntro">НАПОМИНАНИЕ</p>
+        <p id="textReminder" class="reminderText">${reminder.text}</p>
+    </a>
+`)
+    formReminderWrapper.style = "display: flex"
+    const reminderClick = document.getElementById(`reminder${reminder.id}`)
+    reminderClick.addEventListener("click", () => {
+        reminderClick.remove()
+        deleteReminder(reminder.id)
+    })
+}
+
+const deleteReminder = (id) => {
+
+}
+
 const addTimerTask = (task) => {
     const nowDateTime = new Date
     const nowTime = new Date(`${checkDataTimeFormat(nowDateTime.getFullYear())}-${checkDataTimeFormat(nowDateTime.getMonth() + 1)}-${checkDataTimeFormat(nowDateTime.getDate())}T${checkDataTimeFormat(nowDateTime.getHours())}:${checkDataTimeFormat(nowDateTime.getMinutes())}`)
     const taskTime = new Date(task.dateTime)
-    setTimeout(() => {console.log("timer")}, taskTime - nowTime)
+    showReminder(task)
+
+    // setTimeout(() => {console.log("timer")}, taskTime - nowTime)
 }
 
 const showForm = (URLink) => {
     inputURL.value = URLink
     const nowDatetime = new Date
     inputDate.value = `${checkDataTimeFormat(nowDatetime.getFullYear())}-${checkDataTimeFormat(nowDatetime.getMonth() + 1)}-${checkDataTimeFormat(nowDatetime.getDate())}T${checkDataTimeFormat(nowDatetime.getHours())}:${checkDataTimeFormat(nowDatetime.getMinutes())}`
+    formReminder.style = "display: flex"
     formReminderWrapper.style = "display: flex"
 }
 
@@ -85,7 +108,7 @@ fetch('https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.jso
 }).catch(() => console.error("Ошибка получения данных"))
 
 
-showReminder.style = "display: none"
+// showReminder.style = "display: none"
 if(localStorage.getItem("countPages") == null || JSON.parse(localStorage.getItem("countPages")) <= 0) {
     localStorage.setItem("countPages", JSON.stringify(1))
 } else {
