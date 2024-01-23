@@ -40,6 +40,17 @@ openForm.addEventListener("click", () => {showForm(document.URL)})
 
 /* Функции */
 
+const deleteReminder = (reminderId) => {
+    const remindersList = JSON.parse(localStorage.getItem("tasksList"))
+    let newRemindersList = []
+    for(let i = 0; i < remindersList.length; i++) {
+        if(remindersList[i].id != reminderId) {
+            newRemindersList.push(remindersList[i])
+        }
+    }
+    localStorage.setItem("tasksList", JSON.stringify(newRemindersList))
+}
+
 const showReminder = (reminder) => {
     formReminderWrapper.insertAdjacentHTML("afterbegin", `
     <a href="${reminder.URLaddres}" id="reminder${reminder.id}" class="showReminder">
@@ -53,10 +64,18 @@ const showReminder = (reminder) => {
         reminderClick.remove()
         deleteReminder(reminder.id)
     })
-}
-
-const deleteReminder = (id) => {
-
+    addEventListener("storage", () => {
+        const remindersList = JSON.parse(localStorage.getItem("tasksList"))
+        let flag = true
+        for(let i = 0; i < remindersList.length; i++) {
+            if(remindersList[i].id == reminder.id) {
+                flag = false
+            }
+        }
+        if(flag) {
+            reminderClick.remove()
+        }
+    })
 }
 
 const addTimerTask = (task) => {
