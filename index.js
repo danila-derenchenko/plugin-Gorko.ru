@@ -7,37 +7,6 @@ const inputText = document.getElementById("formReminderText")
 const inputDate = document.querySelector("#formReminderDate")
 const formReminderWrapper = document.getElementById("formReminderWrapper")
 
-/* Слушатели событий */
-
-window.addEventListener("beforeunload", () => {
-    if((JSON.parse(localStorage.getItem("countPages")) - 1) == 0) {
-        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
-        localStorage.setItem("tasksList", JSON.stringify([]))
-        localStorage.setItem("loadedReminder", JSON.parse(false))
-    } else {
-        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
-    }
-})
-
-/* при событии submit данные о новой задаче добавляются в localhost */
-
-formReminder.addEventListener("submit", (event) => {
-    event.preventDefault()
-    formReminderWrapper.style = "display: none"
-    formReminder.style = "display: none"
-    const data = {
-        dateTime: inputDate.value,
-        URLaddres: inputURL.value,
-        text: inputText.value
-    }
-    console.log(data)
-    inputText.value = ""
-    inputDate.value = ""
-    addTask(data)
-})
-
-openForm.addEventListener("click", () => {showForm(document.URL)})
-
 /* Функции */
 
 const deleteReminder = (reminderId) => {
@@ -47,6 +16,9 @@ const deleteReminder = (reminderId) => {
         if(remindersList[i].id != reminderId) {
             newRemindersList.push(remindersList[i])
         }
+    }
+    if(newRemindersList.length == 0) {
+        formReminderWrapper.style = "display: none"
     }
     localStorage.setItem("tasksList", JSON.stringify(newRemindersList))
 }
@@ -75,6 +47,9 @@ const showReminder = (reminder) => {
         if(flag) {
             reminderClick.remove()
         }
+        if(remindersList.length == 0) {
+            formReminderWrapper.style = "display: none"
+        }
     })
 }
 
@@ -83,7 +58,7 @@ const addTimerTask = (task) => {
     const nowTime = new Date(`${checkDataTimeFormat(nowDateTime.getFullYear())}-${checkDataTimeFormat(nowDateTime.getMonth() + 1)}-${checkDataTimeFormat(nowDateTime.getDate())}T${checkDataTimeFormat(nowDateTime.getHours())}:${checkDataTimeFormat(nowDateTime.getMinutes())}`)
     const taskTime = new Date(task.dateTime)
     showReminder(task)
-
+    console.log(taskTime - nowTime)
     // setTimeout(() => {console.log("timer")}, taskTime - nowTime)
 }
 
@@ -122,6 +97,47 @@ const initualizationTaskList = (taskList) => {
     }
 }
 
+/* Слушатели событий */
+
+window.addEventListener("beforeunload", () => {
+    if((JSON.parse(localStorage.getItem("countPages")) - 1) == 0) {
+        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
+        localStorage.setItem("tasksList", JSON.stringify([]))
+        localStorage.setItem("loadedReminder", JSON.parse(false))
+    } else {
+        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
+    }
+})
+
+window.addEventListener("DOMContentLoaded", () => {
+    // Проверка количества открытых вкладок
+    if(localStorage.getItem("countPages") == null || JSON.parse(localStorage.getItem("countPages")) <= 0) {
+        localStorage.setItem("countPages", JSON.stringify(1))
+    } else {
+    const countPages = JSON.parse(localStorage.getItem("countPages"))
+    localStorage.setItem("countPages", JSON.stringify(countPages + 1))
+}
+})
+
+/* при событии submit данные о новой задаче добавляются в localhost */
+
+formReminder.addEventListener("submit", (event) => {
+    event.preventDefault()
+    formReminderWrapper.style = "display: none"
+    formReminder.style = "display: none"
+    const data = {
+        dateTime: inputDate.value,
+        URLaddres: inputURL.value,
+        text: inputText.value
+    }
+    console.log(data)
+    inputText.value = ""
+    inputDate.value = ""
+    addTask(data)
+})
+
+openForm.addEventListener("click", () => {showForm(document.URL)})
+
 // Логика
 
 /* Запросы к серверу */
@@ -137,11 +153,4 @@ if(localStorage.getItem("loadedReminder") == null || JSON.parse(localStorage.get
     for(let i = 0; i < JSON.parse(localStorage.getItem("tasksList")).length; i++) {
         addTimerTask(JSON.parse(localStorage.getItem("tasksList"))[i])
     }
-}
-// Проверка количества открытых вкладок
-if(localStorage.getItem("countPages") == null || JSON.parse(localStorage.getItem("countPages")) <= 0) {
-    localStorage.setItem("countPages", JSON.stringify(1))
-} else {
-    const countPages = JSON.parse(localStorage.getItem("countPages"))
-    localStorage.setItem("countPages", JSON.stringify(countPages + 1))
 }
