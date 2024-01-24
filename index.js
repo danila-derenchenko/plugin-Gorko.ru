@@ -57,9 +57,8 @@ const addTimerTask = (task) => {
     const nowDateTime = new Date
     const nowTime = new Date(`${checkDataTimeFormat(nowDateTime.getFullYear())}-${checkDataTimeFormat(nowDateTime.getMonth() + 1)}-${checkDataTimeFormat(nowDateTime.getDate())}T${checkDataTimeFormat(nowDateTime.getHours())}:${checkDataTimeFormat(nowDateTime.getMinutes())}`)
     const taskTime = new Date(task.dateTime)
-    showReminder(task)
     console.log(taskTime - nowTime)
-    // setTimeout(() => {console.log("timer")}, taskTime - nowTime)
+    setTimeout(() => {showReminder(task)}, taskTime - nowTime)
 }
 
 const showForm = (URLink) => {
@@ -139,8 +138,6 @@ formReminder.addEventListener("submit", (event) => {
 openForm.addEventListener("click", () => {showForm(document.URL)})
 
 // Логика
-
-/* Запросы к серверу */
 
 // Проверка загрузки напоминаний с сервера на других вкладках
 if(localStorage.getItem("loadedReminder") == null || JSON.parse(localStorage.getItem("loadedReminder")) == false) {
