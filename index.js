@@ -53,14 +53,6 @@ const showReminder = (reminder) => {
     })
 }
 
-const addTimerTask = (task) => {
-    const nowDateTime = new Date
-    const nowTime = new Date(`${checkDataTimeFormat(nowDateTime.getFullYear())}-${checkDataTimeFormat(nowDateTime.getMonth() + 1)}-${checkDataTimeFormat(nowDateTime.getDate())}T${checkDataTimeFormat(nowDateTime.getHours())}:${checkDataTimeFormat(nowDateTime.getMinutes())}`)
-    const taskTime = new Date(task.dateTime)
-    console.log(taskTime - nowTime)
-    setTimeout(() => {showReminder(task)}, taskTime - nowTime)
-}
-
 const showForm = (URLink) => {
     inputURL.value = URLink
     const nowDatetime = new Date
@@ -77,46 +69,19 @@ const checkDataTimeFormat = (datetime) => {
     }
 }
 
-const addTask = (task) => {
+const sendTask = (task) => {
+    console.log("Task send sucsessfully")
     console.log(task)
-    addTimerTask(task)
-    if(localStorage.getItem("tasksList") != null) {
-        let localstorageData = JSON.parse(localStorage.getItem("tasksList"))
-        localstorageData.push(task)
-        localStorage.setItem("tasksList", JSON.stringify(localstorageData))
-    } else {
-        localStorage.setItem("tasksList", JSON.stringify([task]))
-    }
 }
 
-const initualizationTaskList = (taskList) => {
+/* const initualizationTaskList = (taskList) => {
     console.log(taskList)
     for(let i = 0; i < taskList.length; i++) {
         addTask(taskList[i])
     }
-}
+} */
 
 /* Слушатели событий */
-
-window.addEventListener("beforeunload", () => {
-    if((JSON.parse(localStorage.getItem("countPages")) - 1) == 0) {
-        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
-        localStorage.setItem("tasksList", JSON.stringify([]))
-        localStorage.setItem("loadedReminder", JSON.parse(false))
-    } else {
-        localStorage.setItem("countPages", JSON.stringify(JSON.parse(localStorage.getItem("countPages")) - 1))
-    }
-})
-
-window.addEventListener("DOMContentLoaded", () => {
-    // Проверка количества открытых вкладок
-    if(localStorage.getItem("countPages") == null || JSON.parse(localStorage.getItem("countPages")) <= 0) {
-        localStorage.setItem("countPages", JSON.stringify(1))
-    } else {
-    const countPages = JSON.parse(localStorage.getItem("countPages"))
-    localStorage.setItem("countPages", JSON.stringify(countPages + 1))
-}
-})
 
 /* при событии submit данные о новой задаче добавляются в localhost */
 
@@ -124,6 +89,7 @@ formReminder.addEventListener("submit", (event) => {
     event.preventDefault()
     formReminderWrapper.style = "display: none"
     formReminder.style = "display: none"
+
     const data = {
         dateTime: inputDate.value,
         URLaddres: inputURL.value,
@@ -132,22 +98,7 @@ formReminder.addEventListener("submit", (event) => {
     console.log(data)
     inputText.value = ""
     inputDate.value = ""
-    addTask(data)
+    sendTask(data)
 })
 
 openForm.addEventListener("click", () => {showForm(document.URL)})
-
-// Логика
-
-// Проверка загрузки напоминаний с сервера на других вкладках
-if(localStorage.getItem("loadedReminder") == null || JSON.parse(localStorage.getItem("loadedReminder")) == false) {
-    localStorage.setItem("loadedReminder", JSON.stringify(true))
-    // Получение уже созданных задач, и установка таймеров
-    fetch('https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json').then((res) => res.json()).then(result => {
-        initualizationTaskList(result)
-    }).catch(() => console.error("Ошибка получения данных"))
-} else {
-    for(let i = 0; i < JSON.parse(localStorage.getItem("tasksList")).length; i++) {
-        addTimerTask(JSON.parse(localStorage.getItem("tasksList"))[i])
-    }
-}
