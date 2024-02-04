@@ -74,6 +74,21 @@ const sendTask = (task) => {
     console.log(task)
 }
 
+const startSurveyServer = () => {
+    let flag = true
+    window.addEventListener('focus', () => {
+        flag = true
+      });
+    window.addEventListener('blur', () => {
+        flag = false
+      });
+    setInterval(() => {
+        if(flag) {
+            fetch("ya.ru")
+        }
+    }, 10000)
+}
+
 /* const initualizationTaskList = (taskList) => {
     console.log(taskList)
     for(let i = 0; i < taskList.length; i++) {
@@ -82,8 +97,6 @@ const sendTask = (task) => {
 } */
 
 /* Слушатели событий */
-
-/* при событии submit данные о новой задаче добавляются в localhost */
 
 formReminder.addEventListener("submit", (event) => {
     event.preventDefault()
@@ -102,3 +115,5 @@ formReminder.addEventListener("submit", (event) => {
 })
 
 openForm.addEventListener("click", () => {showForm(document.URL)})
+
+startSurveyServer()
