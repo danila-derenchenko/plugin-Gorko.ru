@@ -1,11 +1,13 @@
 /* Константы и переменные */
 
 const openForm = document.querySelector("#openFormReminder")
+const closeForm = document.querySelector("#closeFormReminder")
 const formReminder = document.getElementById("formReminder")
 const inputURL = document.getElementById("formReminderURL")
 const inputText = document.getElementById("formReminderText")
 const inputDate = document.querySelector("#formReminderDate")
 const formReminderWrapper = document.getElementById("formReminderWrapper")
+let flagFocus = true
 
 /* Функции */
 
@@ -24,8 +26,15 @@ const deleteReminder = (reminderId) => {
 }
 
 const showReminder = (reminder) => {
+    if(localStorage.getItem("tasksList") != null) {
+        let localstorageData = JSON.parse(localStorage.getItem("tasksList"))
+        localstorageData.push(reminder)
+        localStorage.setItem("tasksList", JSON.stringify(localstorageData))
+    } else {
+        localStorage.setItem("tasksList", JSON.stringify([reminder]))
+    }
     formReminderWrapper.insertAdjacentHTML("afterbegin", `
-    <a href="${reminder.URLaddres}" id="reminder${reminder.id}" class="showReminder">
+    <a href="${reminder.URLaddres}" target="_blank" id="reminder${reminder.id}" class="showReminder">
         <p class="reminderIntro">НАПОМИНАНИЕ</p>
         <p id="textReminder" class="reminderText">${reminder.text}</p>
     </a>
@@ -37,18 +46,20 @@ const showReminder = (reminder) => {
         deleteReminder(reminder.id)
     })
     addEventListener("storage", () => {
-        const remindersList = JSON.parse(localStorage.getItem("tasksList"))
+        const remindersList = JSON.parse(localStorage.getItem("tasksList")) || []
         let flag = true
-        for(let i = 0; i < remindersList.length; i++) {
-            if(remindersList[i].id == reminder.id) {
-                flag = false
+        if(remindersList.length != 0) {
+            for(let i = 0; i < remindersList.length; i++) {
+                if(remindersList[i].id == reminder.id) {
+                    flag = false
+                }
             }
-        }
-        if(flag) {
-            reminderClick.remove()
-        }
-        if(remindersList.length == 0) {
-            formReminderWrapper.style = "display: none"
+            if(flag) {
+                reminderClick.remove()
+            }
+            if(remindersList.length == 0) {
+                formReminderWrapper.style = "display: none"
+            }
         }
     })
 }
@@ -70,33 +81,45 @@ const checkDataTimeFormat = (datetime) => {
 }
 
 const sendTask = (task) => {
-    console.log("Task send sucsessfully")
-    console.log(task)
+    // здесь задача уходит на сервер
+    fetch("", {
+        method: "POST",
+        body: JSON.stringify(task)
+    })
+}
+
+const toUTCTime = (time) => {
+    const toUTC = new Date(time)
+    return `${toUTC.getUTCFullYear()}-${toUTC.getUTCMonth()}-${toUTC.getUTCDate()}T${toUTC.getUTCHours()}:${toUTC.getUTCMinutes()}`
 }
 
 const startSurveyServer = () => {
-    let flag = true
-    window.addEventListener('focus', () => {
-        flag = true
-      });
-    window.addEventListener('blur', () => {
-        flag = false
-      });
-    setInterval(() => {
-        if(flag) {
-            fetch("ya.ru")
-        }
-    }, 10000)
+    if(flagFocus) {
+        setTimeout(() => {
+            fetch("https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json").then(result => result.json()).then(result => initualizationTaskList(result)).finally(startSurveyServer())
+        }, 10000)
+    }
 }
 
-/* const initualizationTaskList = (taskList) => {
+const initualizationTaskList = (taskList) => {
     console.log(taskList)
     for(let i = 0; i < taskList.length; i++) {
-        addTask(taskList[i])
+        showReminder(taskList[i])
     }
-} */
+}
 
 /* Слушатели событий */
+
+window.addEventListener('focus', () => {
+    flagFocus = true
+    startSurveyServer()
+});
+window.addEventListener('blur', () => {
+    flagFocus = false
+});
+
+// Запуск опроса сервера
+startSurveyServer()
 
 formReminder.addEventListener("submit", (event) => {
     event.preventDefault()
@@ -104,7 +127,7 @@ formReminder.addEventListener("submit", (event) => {
     formReminder.style = "display: none"
 
     const data = {
-        dateTime: inputDate.value,
+        dateTime: toUTCTime(inputDate.value),
         URLaddres: inputURL.value,
         text: inputText.value
     }
@@ -115,5 +138,14 @@ formReminder.addEventListener("submit", (event) => {
 })
 
 openForm.addEventListener("click", () => {showForm(document.URL)})
+closeForm.addEventListener("click", () => {
+    formReminder.style = "display: none"
+    formReminderWrapper.style = "display: none"
+})
 
-startSurveyServer()
+if(JSON.parse(localStorage.getItem("tasksList")) != null) {
+    const tasksInitialization = JSON.parse(localStorage.getItem("tasksList"))
+    for(let i = 0; i < tasksInitialization.length; i++) {
+        showReminder(tasksInitialization[i])
+    }
+}
