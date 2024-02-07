@@ -45,7 +45,7 @@ let reminderPluginMethods = {
         const reminderClick = document.getElementById(`reminder${reminder.id}`)
         reminderClick.addEventListener("click", () => {
             reminderClick.remove()
-            deleteReminder(reminder.id)
+            reminderPluginMethods.deleteReminder(reminder.id)
         })
         addEventListener("storage", () => {
             const remindersList = JSON.parse(localStorage.getItem("tasksList")) || []
@@ -65,19 +65,19 @@ let reminderPluginMethods = {
             }
         })
     },
-    showForm: (URLink) => {
-        reminderPluginConsts.inputURL.value = URLink
-        const nowDatetime = new Date
-        reminderPluginConsts.inputDate.value = `${checkDataTimeFormat(nowDatetime.getFullYear())}-${checkDataTimeFormat(nowDatetime.getMonth() + 1)}-${checkDataTimeFormat(nowDatetime.getDate())}T${checkDataTimeFormat(nowDatetime.getHours())}:${checkDataTimeFormat(nowDatetime.getMinutes())}`
-        reminderPluginConsts.formReminder.style = "display: flex"
-        reminderPluginConsts.formReminderWrapper.style = "display: flex"
-    },
     checkDataTimeFormat: (datetime) => {
         if (datetime < 10) {
             return `0${datetime}`
         } else {
             return `${datetime}`
         }
+    },
+    showForm: (URLink) => {
+        reminderPluginConsts.inputURL.value = URLink
+        const nowDatetime = new Date
+        reminderPluginConsts.inputDate.value = `${reminderPluginMethods.checkDataTimeFormat(nowDatetime.getFullYear())}-${reminderPluginMethods.checkDataTimeFormat(nowDatetime.getMonth() + 1)}-${reminderPluginMethods.checkDataTimeFormat(nowDatetime.getDate())}T${reminderPluginMethods.checkDataTimeFormat(nowDatetime.getHours())}:${reminderPluginMethods.checkDataTimeFormat(nowDatetime.getMinutes())}`
+        reminderPluginConsts.formReminder.style = "display: flex"
+        reminderPluginConsts.formReminderWrapper.style = "display: flex"
     },
     sendTask: (task) => {
         // здесь задача уходит на сервер
@@ -90,17 +90,17 @@ let reminderPluginMethods = {
         const toUTC = new Date(time)
         return `${toUTC.getUTCFullYear()}-${toUTC.getUTCMonth()}-${toUTC.getUTCDate()}T${toUTC.getUTCHours()}:${toUTC.getUTCMinutes()}`
     },
-    startSurveyServer: () => {
-        if (reminderPluginConsts.flagFocus) {
-            setTimeout(() => {
-                fetch("https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json").then(result => result.json()).then(result => initualizationTaskList(result)).finally(startSurveyServer())
-            }, 10000)
-        }
-    },
     initualizationTaskList: (taskList) => {
         console.log(taskList)
         for (let i = 0; i < taskList.length; i++) {
-            showReminder(taskList[i])
+            reminderPluginMethods.showReminder(taskList[i])
+        }
+    },
+    startSurveyServer: () => {
+        if (reminderPluginConsts.flagFocus) {
+            setTimeout(() => {
+                fetch("https://raw.githubusercontent.com/danila-derenchenko/forApi/main/data.json").then(result => result.json()).then(result => reminderPluginMethods.initualizationTaskList(result)).finally(reminderPluginMethods.startSurveyServer())
+            }, 10000)
         }
     }
 }
@@ -109,14 +109,14 @@ let reminderPluginMethods = {
 
 window.addEventListener('focus', () => {
     reminderPluginConsts.flagFocus = true
-    startSurveyServer()
+    reminderPluginMethods.startSurveyServer()
 });
 window.addEventListener('blur', () => {
     reminderPluginConsts.flagFocus = false
 });
 
 // Запуск опроса сервера
-startSurveyServer()
+reminderPluginMethods.startSurveyServer()
 
 reminderPluginConsts.formReminder.addEventListener("submit", (event) => {
     event.preventDefault()
@@ -124,17 +124,17 @@ reminderPluginConsts.formReminder.addEventListener("submit", (event) => {
     reminderPluginConsts.formReminder.style = "display: none"
 
     const data = {
-        dateTime: toUTCTime(reminderPluginConsts.inputDate.value),
+        dateTime: reminderPluginMethods.toUTCTime(reminderPluginConsts.inputDate.value),
         URLaddres: reminderPluginConsts.inputURL.value,
         text: reminderPluginConsts.inputText.value
     }
     console.log(data)
     reminderPluginConsts.inputText.value = ""
     reminderPluginConsts.inputDate.value = ""
-    sendTask(data)
+    reminderPluginMethods.sendTask(data)
 })
 
-openForm.addEventListener("click", () => { showForm(document.URL) })
+openForm.addEventListener("click", () => { reminderPluginMethods.showForm(document.URL) })
 closeForm.addEventListener("click", () => {
     reminderPluginConsts.formReminder.style = "display: none"
     reminderPluginConsts.formReminderWrapper.style = "display: none"
@@ -143,6 +143,6 @@ closeForm.addEventListener("click", () => {
 if (JSON.parse(localStorage.getItem("tasksList")) != null) {
     const tasksInitialization = JSON.parse(localStorage.getItem("tasksList"))
     for (let i = 0; i < tasksInitialization.length; i++) {
-        showReminder(tasksInitialization[i])
+        reminderPluginMethods.showReminder(tasksInitialization[i])
     }
 }
